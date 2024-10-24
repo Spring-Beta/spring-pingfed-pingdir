@@ -4,10 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -15,29 +11,17 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/public/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(this.oauth2UserService())
-                        )
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/login/**", "/error/**", "/").permitAll() // Allow unauthenticated access to these paths
+                        .anyRequest().authenticated()) // All other requests need authentication
+                .oauth2Login(oauth2 -> oauth2 // Enable OAuth2 login
+                        .loginPage("/login") // Custom login page if needed
+                        .defaultSuccessUrl("/home", true) // Redirect after successful login
+                        .failureUrl("/login?error=true") // Redirect on failure
                 );
 
         return http.build();
-    }
-
-    @Bean
-    public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
-        DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
-
-        return request -> {
-            OAuth2User user = delegate.loadUser(request);
-            // Here you can fetch additional user details from PingDirectory
-            return new CustomOAuth2User(user);
-        };
     }
 }

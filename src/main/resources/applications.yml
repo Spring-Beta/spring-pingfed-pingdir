@@ -1,31 +1,26 @@
+server:
+  port: 8080
+
 spring:
   application:
-    name: spring-pingfed-pingdir
+    name: my-spring-app
 
-  security:
-    oauth2:
-      client:
-        registration:
-          pingfederate:
-            client-id: your-client-id
-            client-secret: your-client-secret
-            scope:
-              - openid
-              - profile
-              - email
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-        provider:
-          pingfederate:
-            issuer-uri: https://localhost:9031
-            authorization-uri: https://localhost:9031/as/authorization.oauth2
-            token-uri: https://localhost:9031/as/token.oauth2
-            user-info-uri: https://localhost:9031/idp/userinfo.openid
-            jwk-set-uri: https://localhost:9031/pf/JWKS
-            user-name-attribute: sub
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
 
-  ldap:
-    urls: ldaps://localhost:1636
-    base: dc=example,dc=com
-    username: cn=administrator
-    password: 2FederateM0re
+security:
+  oauth2:
+    client:
+      registration:
+        ping:
+          client-id: spring-app
+          client-secret: hgPFFcaqm8GN4eNA1nrffoSoA798N1jLQpkAx20NqFj0cEiKwQ74v1mAiBCIDbyC
+          scope: openid, profile
+          redirect-uri: "http://localhost:8080/login/oauth2/code/pingfederate"
+      provider:
+        ping:
+          authorization-uri: https://localhost:9031/as/authorization.oauth2
+          token-uri: https://localhost:9031/as/token.oauth2
+          user-info-uri: https://localhost:9031/idp/userinfo.openid
